@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>雷达图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .container .img{
+            position: absolute;
+            top: 0;
+            left: 25%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="role">
+            <img src="http://game.gtimg.cn/images/xxsy/web201707/image/sub/role/yj-txt.png" alt="">
+        </div>
+        <div class="img">
+            <img src="http://game.gtimg.cn/images/xxsy/web201707/image/sub/role/yj-img.png" alt="">
+        </div>
+    </div>
+<script>
+var mW = 400,
+    mH = 400,
+    mCtx = null,
+    mCount = 6,
+    mCenter = mW/2,
+    mRadius = mCenter - 50,
+    mAngle = Math.PI*2/mCount,
+    mColorPolygon = '#000000',
+    mData = [
+      ['爆发', 100],
+      ['防御', 60],
+      ['治疗', 50],
+      ['控制', 60],
+      ['辅助', 30],
+      ['机动', 70]
+    ],
+    mColorText = '#000000',
+    canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
+    canvas.width = mW;
+    canvas.height = mH;
+    mCtx = canvas.getContext('2d');
+
+function drawPolygon(ctx) {
+    ctx.save();   // save the default state
+    ctx.strokeStyle = mColorPolygon;
+    var r = mRadius / mCount;
+    for(var i = 0; i < mCount; i++) {
+        ctx.beginPath();   //开始路径
+        var currR = r * (i + 1);
+        for(var j = 0; j < mCount; j++) {
+            var x = mCenter + currR*Math.cos(mAngle*j);
+            var y = mCenter + currR*Math.sin(mAngle*j);
+            ctx.lineTo(x, y);  
+        }
+        ctx.closePath();  //闭合路径
+        ctx.stroke()  // restore to the default state
+    }
+    ctx.restore();
+}
+function drawLines(ctx) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.strokeStyle = mColorPolygon;
+  for( var i = 0; i< mCount; i++){
+    var x = mCenter + mRadius * Math.cos(mAngle*i);
+    var y = mCenter + mRadius * Math.sin(mAngle*i);
+    ctx.moveTo(mCenter, mCenter);
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+function drawText(ctx) {
+  ctx.save();
+  var fontSize = mCenter/12;
+  ctx.font = fontSize + 'px Microsoft Yahei';
+  ctx.fillStyle = mColorText;
+  for(var i = 0; i< mCount; i++){
+    var x = mCenter + mRadius*Math.cos(mAngle*i);
+    var y = mCenter + mRadius*Math.sin(mAngle*i);
+    //通过不同的位置，调整文本的显示位置
+    if( mAngle * i >= 0 && mAngle * i <= Math.PI / 2 ){
+            ctx.fillText(mData[i][0], x, y + fontSize);
+        }else if(mAngle * i > Math.PI / 2 && mAngle * i <= Math.PI){
+            ctx.fillText(mData[i][0], x - ctx.measureText(mData[i][0]).width, y + fontSize);
+        }else if(mAngle * i > Math.PI && mAngle * i <= Math.PI * 3 / 2){
+            ctx.fillText(mData[i][0], x - ctx.measureText(mData[i][0]).width, y);
+        }else{
+            ctx.fillText(mData[i][0], x, y);
+        }
+  }
+  ctx.restore();
+}
+function drawRegion(ctx) {
+  ctx.save();
+  ctx.beginPath();
+  for(var i = 0; i< mCount; i++){
+    var x = mCenter + mRadius*Math.cos(mAngle*i)*mData[i][1]/100;
+    var y = mCenter + mRadius*Math.sin(mAngle*i)*mData[i][1]/100;
+    ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,0,0,.5)';
+  ctx.fill();
+  ctx.store();
+}
+function init () {
+    drawPolygon(mCtx);  //绘制多边形
+    drawLines(mCtx);  //绘制直线
+    drawText(mCtx);  //绘制文本
+    drawRegion(mCtx); //绘制覆盖区域
+}
+init();
+</script>
+</body>
+</html>
